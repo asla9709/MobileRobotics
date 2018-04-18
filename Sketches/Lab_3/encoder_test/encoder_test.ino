@@ -3,7 +3,7 @@
 #include <Motor.h>
 #include <I2CEncoder.h>
 
-const int startButton = 12;
+const int startButton = 10;
 
 Motor leftMotor(2,3);
 Motor rightMotor(4,5);
@@ -26,12 +26,5 @@ void setup() {
 }
 
 void loop() {
-  leftMotor.forward(50);
-  delay(1500);
-  int i = encoder.getSpeed();
-  Serial.print("Speed = ");
-  Serial.println(i);
-  i = encoder2.getSpeed();
-  Serial.print("Speed2 = ");
-  Serial.println(i);
+
 }
