@@ -50,5 +50,12 @@ void Car::backwardInches(int inchesToTravel, int speed){
 	
 	delay(seconds * 1000);
 	stop();
-	
+}
+
+void Car::wait(int pin){
+	pinMode(pin,INPUT);
+  
+	while(digitalRead(pin)==LOW){
+		delay(3);
+	}
 }

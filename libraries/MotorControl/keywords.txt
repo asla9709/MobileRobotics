@@ -7,3 +7,4 @@ getRPS	KEYWORD2
 getLeftWheelSpeed KEYWORD2
 forwardInches	KEYWORD2
 backwardInches	KEYWORD2
+wait		KEYWORD2

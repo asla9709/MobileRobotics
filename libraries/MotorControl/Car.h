@@ -20,6 +20,7 @@ class Car
 		void stop();
 		void forwardInches(int inchesToTravel, int speed);
 		void backwardInches(int inchesToTravel, int speed);	
+		void wait(int pin);
 		
 };
 #endif	
