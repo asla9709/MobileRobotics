@@ -1,31 +1,41 @@
 #include "Arduino.h"
 #include "Motor.h"
 #include "Car.h"
+#include "I2CEncoder.h"
+#include "Wire.h"
 
 //temporary fix to offset motor difference
 const int wheelOffset = 7;
+ 
 
-Car::Car(Motor *leftMotor, Motor *rightMotor){
+Car::Car(Motor *leftMotor, Motor *rightMotor, I2CEncoder *leftEncoder, I2CEncoder *rightEncoder)
+{
 	_motorLeft = leftMotor;
 	_motorRight = rightMotor;
+	_encoderLeft = leftEncoder;
+	_encoderRight = rightEncoder;
 }
 
-void Car::forward(int speed){
+void Car::forward(int speed)
+{
 	_motorRight->forward(speed);
 	_motorLeft->forward(speed - wheelOffset);
 }
 
-void Car::backward(int speed){
+void Car::backward(int speed)
+{
 	_motorRight->backward(speed);
 	_motorLeft->backward(speed - wheelOffset);
 }
 
-void Car::stop(){
+void Car::stop()
+{
 	_motorRight->stop();
 	_motorLeft->stop();
 }
 
-void Car::forwardInches(int inchesToTravel, int speed){
+void Car::forwardInches(int inchesToTravel, int speed)
+{
 	float wheelCir = 12.56;
 	//calculate the number of seconds to activate the motors to travel a distance
 	float seconds = (inchesToTravel)/ (wheelCir) / (_motorRight->getRPS(speed));
@@ -40,7 +50,8 @@ void Car::forwardInches(int inchesToTravel, int speed){
 	
 }
 
-void Car::backwardInches(int inchesToTravel, int speed){
+void Car::backwardInches(int inchesToTravel, int speed)
+{
 	float wheelCir = 12.56;
 	float seconds = (inchesToTravel)/ (wheelCir) / (_motorRight->getRPS(speed));
 	//Calculate how long to to activate motors to travel a distance
@@ -52,7 +63,8 @@ void Car::backwardInches(int inchesToTravel, int speed){
 	stop();
 }
 
-void Car::wait(int pin){
+void Car::wait(int pin)
+{
 	pinMode(pin,INPUT);
   
 	while(digitalRead(pin)==LOW){
