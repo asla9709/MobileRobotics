@@ -58,6 +58,12 @@ bool Car::forwardInches(int inchesToTravel, int power)
 	double right_speed;
 	
 	while(distance < inchesToTravel){
+		
+		if(detectObstacle()){
+			stop();
+			return false;
+		}
+		
 		left_speed = _encoderLeft->getSpeed();
 		right_speed = _encoderRight->getSpeed();
 
@@ -71,7 +77,8 @@ bool Car::forwardInches(int inchesToTravel, int power)
 		delay(LOOP_DELAY);
 		distance = getDistanceInches(_encoderLeft) - start_pos_left;
 	}
-	
+	stop();
+	return true;
 }
 
 void Car::backwardInches(int inchesToTravel, int power)
@@ -101,7 +108,7 @@ void Car::backwardInches(int inchesToTravel, int power)
 		delay(LOOP_DELAY);
 		distance = -(getDistanceInches(_encoderLeft) - start_pos_left);
 	}
-	
+	stop();
 }
 
 void Car::wait(int pin)
@@ -121,11 +128,17 @@ static double Car::getDistanceInches(I2CEncoder *encoder)
 
 void Car::turnLeft90()
 {
-	
+	_motorLeft->backward(50);
+	_motorRight->forward(50);
+	delay(500);
+	stop();
 }
 void Car::turnRight90()
 {
-	
+	_motorLeft->forward(50);
+	_motorRight->backward(50);
+	delay(500);
+	stop();
 }
 
 bool Car::detectObstacle()
@@ -157,3 +170,4 @@ void Car::semiAutonomous()
 			}
 		}
 	}
+}

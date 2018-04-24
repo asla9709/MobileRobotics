@@ -28,7 +28,7 @@ class Car
 		void forward (int speed); // speed is in the range 0 to 100
 		void backward (int speed); // speed is in the range 0 to 100
 		void stop();
-		void forwardInches(int inchesToTravel, int power);
+		bool forwardInches(int inchesToTravel, int power);
 		void backwardInches(int inchesToTravel, int power);	
 		static double getDistanceInches(I2CEncoder *encoder);
 		void turnLeft90();
