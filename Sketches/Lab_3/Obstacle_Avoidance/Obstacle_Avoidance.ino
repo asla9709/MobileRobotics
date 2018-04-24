@@ -35,29 +35,8 @@ void setup()
 
 void loop() 
 {
-  square50();
+  car.semiAutonomous();
 }
 
-void square50()
-{
-  for (int i = 0; i < 4; i++)
-  {
-    car.forwardInches(48, 50);
-    delay(1000);
-    car.turnLeft90();
-    delay(1000);
-  }
-}
-
-void square80()
-{
-  for (int i = 0; i < 4; i++)
-  {
-    car.forwardInches(48, 80);
-    delay(1000);
-    car.turnLeft90();
-    delay(1000);
-  }
-}
 
 

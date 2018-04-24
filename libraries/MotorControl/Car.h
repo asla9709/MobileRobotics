@@ -9,6 +9,7 @@
 #include "Motor.h"
 #include "I2CEncoder.h"
 #include "Wire.h"
+#include "NewPing.h"
 
 class Car
 {		
@@ -17,15 +18,21 @@ class Car
 		Motor *_motorRight;
 		I2CEncoder *_encoderLeft;
 		I2CEncoder *_encoderRight;
+		NewPing *_sonar;
 		
 	public:
-		Car(Motor *leftMotor, Motor *rightMotor, I2CEncoder *leftEncoder, I2CEncoder *rightEncoder);
+		Car(Motor *leftMotor, Motor *rightMotor, I2CEncoder *leftEncoder, I2CEncoder *rightEncoder, NewPing *sonar);
+		void wait(int pin);
 		void forward (int speed); // speed is in the range 0 to 100
 		void backward (int speed); // speed is in the range 0 to 100
 		void stop();
-		void forwardInches(int inchesToTravel, int speed);
-		void backwardInches(int inchesToTravel, int speed);	
-		void wait(int pin);
+		bool forwardInches(int inchesToTravel, int speed);
+		void backwardInches(int inchesToTravel, int speed);
+		void turnLeft90();
+		void turnRight90();
+		bool detectObstacle();
+		void semiAutonomous();
+		
 		
 };
 #endif	
