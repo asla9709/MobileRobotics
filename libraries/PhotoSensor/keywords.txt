@@ -1,0 +1,6 @@
+PhotoSensor	KEYWORD1
+PSData	KEYWORD1
+getSensorData	KEYWORD2
+leftRes	KEYWORD2
+centerRes	KEYWORD2
+rightRes	KEYWORD2
