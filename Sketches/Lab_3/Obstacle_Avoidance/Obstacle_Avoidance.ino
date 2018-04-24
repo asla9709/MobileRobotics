@@ -21,7 +21,7 @@ bool start_motion = true;
 
 unsigned long startMillis;
 unsigned long currentMillis;
-const unsigned long DELAY_TIME = 20; 
+const unsigned long DELAY_TIME = 10; 
 
 void setup() 
 {
@@ -54,8 +54,9 @@ void loop()
     startMillis = currentMillis;
   }
 
+ 
   
-  if(car.detectObstacle()){
+  /**if(car.detectObstacle()){
     if (rand() % 2 == 0) //randomly choose left or right
     {
       car.turnRight90();
@@ -65,7 +66,7 @@ void loop()
       car.turnLeft90();
     }
     start_motion = true;
-  }
+  }**/
 }
  
 
