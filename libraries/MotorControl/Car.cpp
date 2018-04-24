@@ -128,16 +128,41 @@ static double Car::getDistanceInches(I2CEncoder *encoder)
 
 void Car::turnLeft90()
 {
-	_motorLeft->backward(50);
-	_motorRight->forward(50);
-	delay(500);
+	double turnRadius = 5.1478; //approximate value for the wheel
+	double pi = 3.14159265359;
+	double circumference = 2 * turnRadius * pi;
+	double inchesToTravel = (90.0/75) * (90.0/ 360.0) * circumference;
+	
+	double start_pos_right = getDistanceInches(_encoderRight); //in inches
+	double distance = getDistanceInches(_encoderRight) - start_pos_right;
+	
+	while (distance < inchesToTravel)
+	{
+		_motorLeft->backward(50);
+		_motorRight->forward(50);
+		delay(LOOP_DELAY);
+		distance = getDistanceInches(_encoderRight) - start_pos_right;
+	}
+	
 	stop();
 }
 void Car::turnRight90()
 {
-	_motorLeft->forward(50);
-	_motorRight->backward(50);
-	delay(500);
+	double turnRadius = 5.1478; //approximate value for the wheel
+	double pi = 3.14159265359;
+	double circumference = 2 * turnRadius * pi;
+	double inchesToTravel = (90.0/82) * (90.0/ 360.0) * circumference; //coefficient
+	
+	double start_pos_left = getDistanceInches(_encoderLeft); //in inches
+	double distance = getDistanceInches(_encoderLeft) - start_pos_left;
+	
+	while (distance < inchesToTravel)
+	{
+		_motorLeft->forward(50);
+		_motorRight->backward(50);
+		delay(LOOP_DELAY);
+		distance = getDistanceInches(_encoderLeft) - start_pos_left;
+	}
 	stop();
 }
 
@@ -156,7 +181,7 @@ void Car::semiAutonomous()
 	//make semi-autonomous decisions if obstacles are detected
 	while (1)
 	{
-		if (!forwardInches(24, 50))
+		if (!forwardInches(240, 50))
 		{
 			//if an obstacle was detected, go backwards a little and turn
 			backwardInches(5, 50);

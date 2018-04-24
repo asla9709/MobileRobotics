@@ -11,9 +11,9 @@ Motor::Motor(int d_pin, int s_pin)
 
 
 void Motor::forward(float speed){
-	 int conv_speed = map(speed,0,100,0,255);
-	 digitalWrite(_d_pin,LOW);
-	 analogWrite(_s_pin,conv_speed);
+	int conv_speed = map(speed,0,100,0,255);
+	digitalWrite(_d_pin,LOW);
+	analogWrite(_s_pin,conv_speed);
 }
 
 void Motor::backward(float speed){
