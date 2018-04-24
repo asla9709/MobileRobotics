@@ -17,6 +17,12 @@ I2CEncoder rightEncoder;
 //initialize car
 Car car(&leftMotor,&rightMotor, &leftEncoder, &rightEncoder, &sonar);
 
+bool start_motion = true;
+
+unsigned long startMillis;
+unsigned long currentMillis;
+const unsigned long DELAY_TIME = 20; 
+
 void setup() 
 {
   // put your setup code here, to run once:
@@ -30,13 +36,38 @@ void setup()
   Serial.begin(9600);
   
   car.wait(startButton);
-  
+  startMillis = millis();
 }
+
+
 
 void loop() 
 {
-  car.semiAutonomous();
+  currentMillis = millis();
+  if (start_motion){
+    car.forwardInchesStart(1000, 50);
+    start_motion = false;
+  }
+
+  if((currentMillis - startMillis) > DELAY_TIME){
+    car.correctDrift();
+    startMillis = currentMillis;
+  }
+
+  
+  if(car.detectObstacle()){
+    if (rand() % 2 == 0) //randomly choose left or right
+    {
+      car.turnRight90();
+    }
+    else
+    {
+      car.turnLeft90();
+    }
+    start_motion = true;
+  }
 }
+ 
 
 
 

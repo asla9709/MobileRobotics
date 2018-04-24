@@ -80,6 +80,41 @@ bool Car::forwardInches(int inchesToTravel, int power)
 	stop();
 	return true;
 }
+void Car::forwardInchesStart(int inchesToTravel, int power)
+{
+	//set distances
+	_startDistance = getDistanceInches(_encoderLeft); //in inches
+	_goalDistance = inchesToTravel;
+	//set power levels
+	_rightPower = power; 
+	_leftPower = power;
+	//start motors
+	_motorRight->forward(_rightPower);
+	_motorLeft->forward(_leftPower);
+}
+
+bool Car::checkDistance()
+{
+	double distance = getDistanceInches(_encoderLeft) - _startDistance;
+	if(distance > _goalDistance){
+		return true;
+	}
+	else return false;
+}
+
+void Car::correctDrift()
+{
+	double left_speed = _encoderLeft->getSpeed();
+	double right_speed = _encoderRight->getSpeed();
+
+	if(right_speed < left_speed){
+		_rightPower += 1;
+	} else if (right_speed > left_speed){
+		_rightPower -= 1;
+	}
+	Serial.println(_rightPower);
+	_motorRight->forward(_rightPower);
+}
 
 void Car::backwardInches(int inchesToTravel, int power)
 {

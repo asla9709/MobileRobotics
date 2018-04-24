@@ -21,7 +21,11 @@ class Car
 		I2CEncoder *_encoderLeft;
 		I2CEncoder *_encoderRight;
 		NewPing *_sonar;
-		
+		int _goalDistance;
+		double _startDistance;
+		int _leftPower;
+		int _rightPower;
+		unsigned long _lastCheckMillis;
 	public:
 		Car(Motor *leftMotor, Motor *rightMotor, I2CEncoder *leftEncoder, I2CEncoder *rightEncoder, NewPing *sonar);
 		void wait(int pin);
@@ -35,5 +39,8 @@ class Car
 		void turnRight90();
 		bool detectObstacle();
 		void semiAutonomous();
+		bool checkDistance();
+		void correctDrift();
+		void forwardInchesStart(int inchesToTravel, int power);
 };
 #endif	
