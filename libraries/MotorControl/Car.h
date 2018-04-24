@@ -11,6 +11,8 @@
 #include "Wire.h"
 #include "NewPing.h"
 
+#define TICKS_PER_REVOLUTION 627.2
+
 class Car
 {		
 	private:
@@ -26,13 +28,12 @@ class Car
 		void forward (int speed); // speed is in the range 0 to 100
 		void backward (int speed); // speed is in the range 0 to 100
 		void stop();
-		bool forwardInches(int inchesToTravel, int speed);
-		void backwardInches(int inchesToTravel, int speed);
+		void forwardInches(int inchesToTravel, int power);
+		void backwardInches(int inchesToTravel, int power);	
+		static double getDistanceInches(I2CEncoder *encoder);
 		void turnLeft90();
 		void turnRight90();
 		bool detectObstacle();
 		void semiAutonomous();
-		
-		
 };
 #endif	

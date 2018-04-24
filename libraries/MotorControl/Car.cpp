@@ -9,6 +9,9 @@
 
 //temporary fix to offset motor difference
 const int wheelOffset = 7;
+
+const int LOOP_DELAY = 10; //ms
+const double circum_inches = 12.56637; //inches
 const double ticksPerRot = 627.2;
 const double wheelDiam = 10.16; //10.16 cm, 4 inches 
 
@@ -40,39 +43,65 @@ void Car::stop()
 	_motorLeft->stop();
 }
 
-bool Car::forwardInches(int inchesToTravel, int speed)
+
+bool Car::forwardInches(int inchesToTravel, int power)
 {
-	//bool return true if car senses obstacle
+	// get initial encoder positions
+	double start_pos_left = getDistanceInches(_encoderLeft); //in inches
 	
+	int right_power = power; // initially, right power is set to left power
+	_motorRight->forward(right_power);
+	_motorLeft->forward(power);
 	
+	double distance = getDistanceInches(_encoderLeft) - start_pos_left;
+	double left_speed;
+	double right_speed;
 	
-	
-	//old code
-	float wheelCir = 12.56;
-	//calculate the number of seconds to activate the motors to travel a distance
-	float seconds = (inchesToTravel)/ (wheelCir) / (_motorRight->getRPS(speed));
-	
-	//turn the motors on
-	_motorRight->forward(speed);
-	_motorLeft->forward(speed - wheelOffset);
-	
-	//travel the distance
-	delay(seconds * 1000);
-	stop();
+	while(distance < inchesToTravel){
+		left_speed = _encoderLeft->getSpeed();
+		right_speed = _encoderRight->getSpeed();
+
+		if(right_speed < left_speed){
+			right_power += 1;
+		} else if (right_speed > left_speed){
+			right_power -= 1;
+		}
+		_motorRight->forward(right_power);
+		
+		delay(LOOP_DELAY);
+		distance = getDistanceInches(_encoderLeft) - start_pos_left;
+	}
 	
 }
 
-void Car::backwardInches(int inchesToTravel, int speed)
+void Car::backwardInches(int inchesToTravel, int power)
 {
-	float wheelCir = 12.56;
-	float seconds = (inchesToTravel)/ (wheelCir) / (_motorRight->getRPS(speed));
-	//Calculate how long to to activate motors to travel a distance
+	// get initial encoder positions
+	double start_pos_left = getDistanceInches(_encoderLeft); //in inches
 	
-	_motorRight->backward(speed);
-	_motorLeft->backward(speed - wheelOffset);
+	int right_power = power; // initially, right power is set to left power
+	_motorRight->backward(right_power);
+	_motorLeft->backward(power);
 	
-	delay(seconds * 1000);
-	stop();
+	double distance = -(getDistanceInches(_encoderLeft) - start_pos_left);
+	double left_speed;
+	double right_speed;
+	
+	while(distance < inchesToTravel){
+		left_speed = _encoderLeft->getSpeed();
+		right_speed = _encoderRight->getSpeed();
+
+		if(right_speed < left_speed){
+			right_power += 1;
+		} else if (right_speed > left_speed){
+			right_power -= 1;
+		}
+		_motorRight->backward(right_power);
+		
+		delay(LOOP_DELAY);
+		distance = -(getDistanceInches(_encoderLeft) - start_pos_left);
+	}
+	
 }
 
 void Car::wait(int pin)
@@ -82,6 +111,12 @@ void Car::wait(int pin)
 	while(digitalRead(pin)==LOW){
 		delay(3);
 	}
+}
+
+
+static double Car::getDistanceInches(I2CEncoder *encoder)
+{
+	return (encoder->getRawPosition() / TICKS_PER_REVOLUTION) * circum_inches;
 }
 
 void Car::turnLeft90()
@@ -122,5 +157,3 @@ void Car::semiAutonomous()
 			}
 		}
 	}
-	
-}
