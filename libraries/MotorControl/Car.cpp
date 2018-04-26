@@ -212,7 +212,7 @@ void Car::turnRight90()
 
 bool Car::detectObstacle()
 {
-	int detectionThreshold = 8; //8 inch threshold;
+	int detectionThreshold = 12; //12 inch threshold;
 	int distance = _sonar->ping_in();
 	if (distance > 0 && distance <= detectionThreshold)
 	{

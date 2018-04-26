@@ -20,3 +20,30 @@ PSData PhotoSensor::getSensorData()
 	
 	return sensorData;
 }
+
+int PhotoSensor::getLeftStatus()
+{
+	if (analogRead(_leftSensor) >= LIGHT_THRESHOLD)
+	{
+		return Dark;
+	}
+	return Light;
+}
+
+int PhotoSensor::getCenterStatus()
+{
+	if (analogRead(_centerSensor) >= LIGHT_THRESHOLD)
+	{
+		return Dark;
+	}
+	return Light;
+}
+
+int PhotoSensor::getRightStatus()
+{
+	if (analogRead(_rightSensor) >= LIGHT_THRESHOLD)
+	{
+		return Dark;
+	}
+	return Light;
+}

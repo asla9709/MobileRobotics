@@ -42,16 +42,32 @@ void setup()
 
 void loop() 
 {
-  PSData sensorData = lightSensor.getSensorData();
-  Serial.print("L:  ");
-  Serial.print(sensorData.leftRes);
-  Serial.print("\t\t\t");
-  Serial.print("C:  ");
-  Serial.print(sensorData.centerRes);
-  Serial.print("\t\t\t");
-  Serial.print("R:  ");
-  Serial.print(sensorData.rightRes);
+  Serial.print("L");
+  Serial.print("\t");
+  Serial.print("C");
+  Serial.print("\t");
+  Serial.print("R");
   Serial.println("");
+  for (int i = 0; i < 1000; i++)
+  {
+    /*PSData sensorData = lightSensor.getSensorData();
+    Serial.print(sensorData.leftRes);
+    Serial.print("\t");
+    Serial.print(sensorData.centerRes);
+    Serial.print("\t");
+    Serial.print(sensorData.rightRes);
+    Serial.println("");*/
+
+    //Status uses Light=0 and Dark=1 keywords
+    Serial.print(lightSensor.getLeftStatus() ? "Dark" : "Light");
+    Serial.print("\t\t");
+    Serial.print(lightSensor.getCenterStatus() ? "Dark" : "Light");
+    Serial.print("\t\t");
+    Serial.print(lightSensor.getRightStatus() ? "Dark" : "Light");
+    Serial.println("");
+    
+  }
+  
 }
 
 

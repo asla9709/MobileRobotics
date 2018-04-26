@@ -4,3 +4,8 @@ getSensorData	KEYWORD2
 leftRes	KEYWORD2
 centerRes	KEYWORD2
 rightRes	KEYWORD2
+getLeftStatus	KEYWORD2
+getCenterStatus	KEYWORD2
+getRightStatus	KEYWORD2
+Light	KEYWORD2
+Dark	KEYWORD2
