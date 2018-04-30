@@ -31,6 +31,18 @@ void Car::forward(int speed)
 	_motorLeft->forward(speed - wheelOffset);
 }
 
+void Car::turnRight()
+{
+	_motorLeft->backward(50);
+	_motorRight->forward(50);
+}
+
+void Car::turnLeft()
+{
+	_motorLeft->forward(50);
+	_motorRight->backward(50);
+}
+
 void Car::backward(int speed)
 {
 	_motorRight->backward(speed);
@@ -210,9 +222,8 @@ void Car::turnRight90()
 	stop();
 }
 
-bool Car::detectObstacle()
+bool Car::detectObstacle(int detectionThreshold = 12)
 {
-	int detectionThreshold = 12; //12 inch threshold;
 	int distance = _sonar->ping_in();
 	if (distance > 0 && distance <= detectionThreshold)
 	{

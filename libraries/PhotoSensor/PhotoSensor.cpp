@@ -14,7 +14,7 @@ PhotoSensor::PhotoSensor(int leftPin, int centerPin, int rightPin)
 	_rightThreshold = INITIAL_THRESHOLD;
 }
 
-void PhotoSensor::calibrateSensors()
+void PhotoSensor::calibrateSensors(bool leftStart = LIGHT, bool centerStart = LIGHT, bool rightStart = LIGHT)
 {
 	//This takes an initial values and does
 	//some math stuff to try to figure out some thresholds
@@ -43,11 +43,20 @@ void PhotoSensor::calibrateSensors()
 	//adjust values based on read numbers
 	double idealFloorAverage = 727; //value calculated in testing
 	double darkTapeAverage = 911;
-	_leftThreshold = INITIAL_THRESHOLD *(avg[0] / idealFloorAverage);
-	_centerThreshold = INITIAL_THRESHOLD *(avg[1] / darkTapeAverage); //calibrate on tark
-	_rightThreshold = INITIAL_THRESHOLD *(avg[2] / idealFloorAverage);
-
+	if (leftStart == LIGHT)
+		_leftThreshold = INITIAL_THRESHOLD *(avg[0] / idealFloorAverage);
+	else
+		_leftThreshold = INITIAL_THRESHOLD *(avg[0] / darkTapeAverage);
 	
+	if (centerStart == LIGHT)
+		_centerThreshold = INITIAL_THRESHOLD *(avg[1] / idealFloorAverage);
+	else
+		_centerThreshold = INITIAL_THRESHOLD *(avg[1] / darkTapeAverage);
+	
+	if (leftStart == LIGHT)
+		_rightThreshold = INITIAL_THRESHOLD *(avg[2] / idealFloorAverage);
+	else
+		_rightThreshold = INITIAL_THRESHOLD *(avg[2] / darkTapeAverage);	
 }
 
 PSData PhotoSensor::getSensorData()
@@ -76,25 +85,25 @@ int PhotoSensor::getLeftStatus()
 {
 	if (analogRead(_leftSensor) >= _leftThreshold)
 	{
-		return Dark;
+		return DARK;
 	}
-	return Light;
+	return LIGHT;
 }
 
 int PhotoSensor::getCenterStatus()
 {
 	if (analogRead(_centerSensor) >= _centerThreshold)
 	{
-		return Dark;
+		return DARK;
 	}
-	return Light;
+	return LIGHT;
 }
 
 int PhotoSensor::getRightStatus()
 {
 	if (analogRead(_rightSensor) >= _rightThreshold)
 	{
-		return Dark;
+		return DARK;
 	}
-	return Light;
+	return LIGHT;
 }

@@ -42,7 +42,7 @@ void setup()
   Serial.begin(9600);
   
   car.wait(startButton);
-  lightSensor.calibrateSensors();
+  lightSensor.calibrateSensors(LIGHT,DARK,LIGHT);
   startMillis = millis();
   start_moving();
 }
@@ -51,6 +51,18 @@ bool is_moving = false;
 bool is_turning = false;
 
 unsigned long turning_timer = 0;
+
+void start_moving(){
+  is_moving = true;
+  is_turning = false;
+  car.forwardInchesStart(1000, 50);
+}
+
+void start_turning(){
+  is_moving = false;
+  is_turning = true;
+}
+
 
 void loop() 
 {
@@ -63,35 +75,35 @@ void loop()
       car.correctDrift();
       startMillis = currentMillis;
     }
-    //check light sensors
-    if(lightSensor.getLeftStatus() && lightSensor.getRightStatus()){
-      car.stop();
-      car.turnRight90();
+    if(lightSensor.getCenterStatus() && lightSensor.getRightStatus()){
+      car.forwardInches(4,50);
       car.turnRight90();
       start_moving();
     }
-    if(lightSensor.getRightStatus()){
+    if(lightSensor.getCenterStatus() && lightSensor.getLeftStatus()){
+      car.forwardInches(4,50);
+      car.turnLeft90();
+      start_moving();
+    }
+    //check light sensors
+    if(lightSensor.getLeftStatus()){
       start_turning();
       car.turnRight();
     }
-    if(lightSensor.getLeftStatus()){
+    if(lightSensor.getRightStatus()){
       start_turning();
       car.turnLeft();
     }
-    if(car.detectObstacle(12)){
-      car.turnRight90();
-    }
+    while(car.detectObstacle(12)){}
   }
 
   if(is_turning){
     int num_dark = lightSensor.getLeftStatus() + lightSensor.getRightStatus();
     if (num_dark > 0){
-      turning_timer = millis();
+      
     }
     if (num_dark == 0){
-      if(millis() - turning_timer > 500){
-        start_moving();
-      }
+      start_moving();
     }
     //else if(num_dark == 2){
     //  car.stop();
@@ -102,19 +114,8 @@ void loop()
   }
 }
 
-void start_moving(){
-  is_moving = true;
-  is_turning = false;
-  car.forwardInchesStart(1000, 50);
-}
-
-void start_turning(){
-  car.stop();
-  turning_timer = millis();
-  is_moving = false;
-  is_turning = true;
-}
 
 
 
-
+ 
+ 

@@ -7,8 +7,8 @@
 #define PhotoSensor_h
 #include "Arduino.h"
 
-#define Light 		0
-#define Dark		1
+#define LIGHT 		0
+#define DARK		1
 
 #define INITIAL_THRESHOLD		825 //best guess value to start, ideal value
 #define SENSOR_MAX			1023
@@ -38,7 +38,7 @@ class PhotoSensor
 		
 	public:
 		PhotoSensor(int leftPin, int centerPin, int rightPin);
-		void calibrateSensors();
+		void calibrateSensors(bool leftStart = LIGHT, bool centerStart = LIGHT, bool rightStart = LIGHT);
 		PSData getSensorData();
 		PSData getThresholdData();
 		int getLeftStatus();
