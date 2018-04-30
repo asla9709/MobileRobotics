@@ -10,7 +10,9 @@
 #define Light 		0
 #define Dark		1
 
-#define LIGHT_THRESHOLD		825
+#define INITIAL_THRESHOLD		825 //best guess value to start, ideal value
+#define SENSOR_MAX			1023
+#define SENSOR_MIN			512
 //Above threshold, sense dark
 //below, senses light
 
@@ -29,10 +31,16 @@ class PhotoSensor
 		int _leftSensor;
 		int _centerSensor;
 		int _rightSensor;
+		//sensor thresholds
+		int _leftThreshold;
+		int _centerThreshold;
+		int _rightThreshold;
 		
 	public:
 		PhotoSensor(int leftPin, int centerPin, int rightPin);
+		void calibrateSensors();
 		PSData getSensorData();
+		PSData getThresholdData();
 		int getLeftStatus();
 		int getCenterStatus();
 		int getRightStatus();

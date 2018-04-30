@@ -45,7 +45,7 @@ void loop()
 {
   currentMillis = millis();
   if (start_motion){
-    car.forwardInchesStart(1000, 50);
+    car.forwardInchesStart(84, 50);
     start_motion = false;
   }
 

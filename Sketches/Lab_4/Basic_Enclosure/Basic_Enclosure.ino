@@ -4,6 +4,8 @@
 #include "Wire.h"
 #include "NewPing.h"
 #include "PhotoSensor.h"
+#include "TimerOne.h"
+
 
 const int startButton = 10;
 const int trigPin = 12;
@@ -24,6 +26,13 @@ PhotoSensor lightSensor(leftPSensor, centerPSensor, rightPSensor);
 //initialize car
 Car car(&leftMotor,&rightMotor, &leftEncoder, &rightEncoder, &sonar);
 
+bool start_motion = true;
+
+unsigned long startMillis;
+unsigned long currentMillis;
+int forwardBit = 0;
+const unsigned long DELAY_TIME = 10; 
+
 void setup() 
 {
   // put your setup code here, to run once:
@@ -37,37 +46,19 @@ void setup()
   Serial.begin(9600);
   
   car.wait(startButton);
-  
+  Timer1.initialize(10000L); //10 milliseconds (10 * 1000 microseconds)
+  Timer1.attachInterrupt(Timer1_ISR);//attach our ISR to the timer interrupt
 }
 
 void loop() 
 {
-  Serial.print("L");
-  Serial.print("\t");
-  Serial.print("C");
-  Serial.print("\t");
-  Serial.print("R");
-  Serial.println("");
-  for (int i = 0; i < 1000; i++)
-  {
-    /*PSData sensorData = lightSensor.getSensorData();
-    Serial.print(sensorData.leftRes);
-    Serial.print("\t");
-    Serial.print(sensorData.centerRes);
-    Serial.print("\t");
-    Serial.print(sensorData.rightRes);
-    Serial.println("");*/
+  //PSData sensorData = lightSensor.getS  ensorData();
+  car.correctDrift(forwardBit);
+}
 
-    //Status uses Light=0 and Dark=1 keywords
-    Serial.print(lightSensor.getLeftStatus() ? "Dark" : "Light");
-    Serial.print("\t\t");
-    Serial.print(lightSensor.getCenterStatus() ? "Dark" : "Light");
-    Serial.print("\t\t");
-    Serial.print(lightSensor.getRightStatus() ? "Dark" : "Light");
-    Serial.println("");
-    
-  }
-  
+void Timer1_ISR()
+{
+  //
 }
 
 

@@ -35,9 +35,8 @@ void setup()
   leftEncoder.setReversed(true);
   rightEncoder.zero();
   Serial.begin(9600);
-  
   car.wait(startButton);
-  
+  lightSensor.calibrateSensors();
 }
 
 void loop() 
@@ -50,14 +49,6 @@ void loop()
   Serial.println("");
   for (int i = 0; i < 1000; i++)
   {
-    /*PSData sensorData = lightSensor.getSensorData();
-    Serial.print(sensorData.leftRes);
-    Serial.print("\t");
-    Serial.print(sensorData.centerRes);
-    Serial.print("\t");
-    Serial.print(sensorData.rightRes);
-    Serial.println("");*/
-
     //Status uses Light=0 and Dark=1 keywords
     Serial.print(lightSensor.getLeftStatus() ? "Dark" : "Light");
     Serial.print("\t\t");
@@ -65,7 +56,23 @@ void loop()
     Serial.print("\t\t");
     Serial.print(lightSensor.getRightStatus() ? "Dark" : "Light");
     Serial.println("");
-    
+
+    PSData sensorData = lightSensor.getThresholdData();
+    Serial.print(sensorData.leftRes);
+    Serial.print("\t\t");
+    Serial.print(sensorData.centerRes);
+    Serial.print("\t\t");
+    Serial.print(sensorData.rightRes);
+    Serial.println("");
+
+    sensorData = lightSensor.getSensorData();
+    Serial.print(sensorData.leftRes);
+    Serial.print("\t\t");
+    Serial.print(sensorData.centerRes);
+    Serial.print("\t\t");
+    Serial.print(sensorData.rightRes);
+    Serial.println("");
+    delay(100);
   }
   
 }
