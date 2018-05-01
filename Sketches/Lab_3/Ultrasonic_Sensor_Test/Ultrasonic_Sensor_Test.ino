@@ -12,12 +12,7 @@ NewPing sonar(trigPin, echoPin);
 void setup() 
 {
     // put your setup code here, to run once:
-    
-    
-    
     Serial.begin(9600); // serial output to show test data
-  
-  
 }
 
 void loop() 

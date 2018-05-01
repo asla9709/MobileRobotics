@@ -94,7 +94,7 @@ void loop()
       start_turning();
       car.turnLeft();
     }
-    while(car.detectObstacle(12)){}
+    while(car.detectObstacle(12)){} //Stop the car if an obstacle is detected
   }
 
   if(is_turning){
