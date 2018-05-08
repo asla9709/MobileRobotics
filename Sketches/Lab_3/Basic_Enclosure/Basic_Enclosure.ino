@@ -79,16 +79,17 @@ void loop()
       car.turnLeft();
     }
     if(car.detectObstacle(12)){
-      car.turnRight90();
+      start_turning();
+      car.turnLeft();
     }
   }
 
   if(is_turning){
     int num_dark = lightSensor.getLeftStatus() + lightSensor.getRightStatus();
-    if (num_dark > 0){
+    if (num_dark > 0 && car.detectObstacle(12)){
       turning_timer = millis();
     }
-    if (num_dark == 0){
+    if (num_dark == 0 && !car.detectObstacle(12)){
       if(millis() - turning_timer > 500){
         start_moving();
       }

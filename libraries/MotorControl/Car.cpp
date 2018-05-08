@@ -33,14 +33,14 @@ void Car::forward(int speed)
 
 void Car::turnRight()
 {
-	_motorLeft->backward(50);
-	_motorRight->forward(50);
+	_motorLeft->backward(0);
+	_motorRight->forward(40);
 }
 
 void Car::turnLeft()
 {
-	_motorLeft->forward(50);
-	_motorRight->backward(50);
+	_motorLeft->forward(40);
+	_motorRight->backward(0);
 }
 
 void Car::backward(int speed)
