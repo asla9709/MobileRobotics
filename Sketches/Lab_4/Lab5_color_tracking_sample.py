@@ -3,6 +3,9 @@
 
 import cv2
 import numpy as np
+import serial
+
+ser = serial.Serial('/dev/ttyACM0',9600)
 
 # Callback function which does nothing for trackbar move
 def nothing(x):
@@ -70,15 +73,19 @@ while True:
         c = max(cnts, key=cv2.contourArea)
         ((x, y), radius) = cv2.minEnclosingCircle(c)
 
-        # only proceed if the radius meets a minimum size
-        if radius > 10:
-        # draw the circle and centroid on the frame,
-        # then update the list of tracked points
-            cv2.circle(img, (int(x), int(y)), int(radius),
-                           (0, 255, 255), 2)
-            text = 'x:'+str(int(x))+'y:'+str(int(y))+'r:'+str(int(radius))
 
-            cv2.putText(img,text,(int(x)-125,int(y)), cv2.FONT_HERSHEY_COMPLEX,1,(0,255,0))
+        # only proceed if the radius meets a minimum size
+        if radius > 6:
+            dataLine = "X{0}Y{0}".format(x,y)
+            ser.write(dataLine.encode('utf-8'))
+        # # draw the circle and centroid on the frame,
+        # # then update the list of tracked points
+        #     cv2.circle(img, (int(x), int(y)), int(radius),
+        #                    (0, 255, 255), 2)
+        #     text = 'x:'+str(int(x))+'y:'+str(int(y))+'r:'+str(int(radius))
+        #
+        #     #cv2.putText(img,text,(int(x)-125,int(y)), cv2.FONT_HERSHEY_COMPLEX,1,(0,255,0))
+        #     ##PUT ON SERIAL
 
 	# Press the Escape key to exit		
     k = cv2.waitKey(1) & 0xFF
