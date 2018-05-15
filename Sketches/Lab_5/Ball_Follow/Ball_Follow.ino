@@ -40,26 +40,29 @@ void setup()
   car.wait(startButton);
 }
 
-const int targetX = 128;
-const int targetY = 210;
+const int targetX = 160;
+const int targetY = 140;
 long x;
 long y;
 
-const float Kturning = 0.8;
-const float Kmoving = 1.5;
-
+const float Kturning = 0.1;
+const float Kmoving = 0.2;
 void move(int leftPower, int rightPower)
 {
-  if(leftPower >= 0){
-    leftMotor.forward(leftPower);
-  } else {
-    leftMotor.backward(abs(leftPower));
+  if(abs(leftPower) > 10){
+    if(leftPower >= 0){
+      leftMotor.forward(leftPower);
+    } else {
+      leftMotor.backward(abs(leftPower));
+    }
   }
 
-  if(rightPower >= 0){
-    rightMotor.forward(leftPower);
-  } else {
-    rightMotor.backward(abs(leftPower));
+  if(abs(rightPower) > 10){
+    if(rightPower >= 0){
+      rightMotor.forward(rightPower);
+    } else {
+      rightMotor.backward(abs(rightPower));
+    }
   }
 }
 
@@ -75,6 +78,8 @@ void readSerial()
   }
 }
 
+int lastMovePower=0;
+int lastTurnPower=0;
 void loop() 
 {
   // find out where the ball is
@@ -85,8 +90,13 @@ void loop()
   else{
     // based on ball Y location, determine overall power
     int movePower = floor(-1 * Kmoving * (y - targetY));
+    movePower = ceil((lastMovePower + movePower + movePower)/3)
     // based on ball X location, determine turning power
     int turnPower = floor(Kturning * (x - targetX));
+    turnPower = ceil((lastTurnPower + turnPower + turnPower)/3)
+    //Serial.print(movePower);
+    //Serial.print('\t');
+    //Serial.println(turnPower);
     // move based on powers.
     move(movePower + turnPower, movePower - turnPower);
   }
