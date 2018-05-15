@@ -119,7 +119,8 @@ void Car::correctDrift()
 	double left_speed = _encoderLeft->getSpeed();
 	double right_speed = _encoderRight->getSpeed();
 	
-	double difference = left_speed - right_speed;
+	double difference = right_speed - left_speed;
+	//double difference = left_speed - right_speed;
 
 	/**if(right_speed < left_speed){
 		_rightPower += 1;
@@ -127,14 +128,19 @@ void Car::correctDrift()
 		_rightPower -= 1;
 	}**/
 	
-	_rightPower += (int) round(difference / 15.0);
+	//_rightPower += (int) round(difference / 15.0);
+	//_motorRight->forward(_rightPower);
+		
+	_leftPower += (int) round(difference / 15.0);
+	_motorLeft->forward(_leftPower);
 	
-	Serial.print(left_speed);
+	/**Serial.print(left_speed);
 	Serial.print("\t");
 	Serial.print(right_speed);
 	Serial.print("\t");
-	Serial.println(_rightPower);
-	_motorRight->forward(_rightPower);
+	Serial.println(_rightPower);**/
+	
+	
 }
 
 void Car::backwardInches(int inchesToTravel, int power)
