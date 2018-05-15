@@ -36,22 +36,48 @@ void setup()
   Serial.begin(9600);
   
   car.wait(startButton);
-  startMillis = millis();
 }
 
+void backwards(int speed)
+{
+  leftMotor.backward(speed);
+  rightMotor.backward(speed);
+}
+void forwards(int speed)
+{
+  leftMotor.forward(speed);
+  rightMotor.forward(speed);
+}
+
+const int targetDistance = 25; //cm
+int distance = 0;
+const float K = 1.8;
+
+int power = 0;
+int targetPower = 0;  
 
 void loop() 
 {
-  currentMillis = millis();
-  if (start_motion){
-    car.forwardInchesStart(84, 50);
-    start_motion = false;
+  //read distance
+  distance = sonar.ping_cm();
+  if(distance > 80 || distance < 5){
+    forwards(0);
   }
-
-  if((currentMillis - startMillis) > DELAY_TIME){
-    car.correctDrift();
-    startMillis = currentMillis;
+  else{
+    int error = targetDistance - distance;
+    if(abs(error) < 5){
+      forwards(0);
+    }
+    else if(error < 0){
+      targetPower = -1 * K * error;
+      forwards(floor(targetPower));
+    }
+    else if(error > 0){
+      targetPower = K * error;
+      backwards(floor(targetPower));
+    }
   }
+  delay(10);
 }
  
 

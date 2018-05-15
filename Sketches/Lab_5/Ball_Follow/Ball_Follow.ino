@@ -36,22 +36,37 @@ void setup()
   Serial.begin(9600);
   
   car.wait(startButton);
-  startMillis = millis();
 }
 
+const int targetX = 128;
+const int targetY = 210;
+int x;
+int y;
+
+int power = 0;
+int targetPower = 0;
+
+void move(int leftPower, int rightPower){
+  if(leftPower >= 0){
+    leftMotor.forwards(leftPower);
+  } else {
+    leftMotor.backwards(abs(leftPower));
+  }
+
+  if(rightPower >= 0){
+    rightMotor.forwards(leftPower);
+  } else {
+    rightMotor.backwards(abs(leftPower));
+  }
+}
 
 void loop() 
 {
-  currentMillis = millis();
-  if (start_motion){
-    car.forwardInchesStart(84, 50);
-    start_motion = false;
-  }
-
-  if((currentMillis - startMillis) > DELAY_TIME){
-    car.correctDrift();
-    startMillis = currentMillis;
-  }
+  // find out where the ball is
+  // based on ball Y location, determine overall power
+  // based on ball X location, determine turning power
+  
+  // move based on powers.
 }
  
 
