@@ -40,14 +40,23 @@ void setup()
   car.wait(startButton);
 }
 
+//Define target
 const int targetX = 160;
 const int targetY = 140;
+const int targetR = 20;
+
 long x;
 long y;
+long r;
 
-const float Kturning = 0.1;
-const float Kmoving = 0.2;
-void move(int leftPower, int rightPower)
+//Define Proportional Constants
+const float Kturning = 0.3;
+const float Kmoving = 0.5;
+const float KmovingR = 5;
+
+//Drive left and right motors
+//if power is too low, don't move
+void drive(int leftPower, int rightPower)
 {
   if(abs(leftPower) > 10){
     if(leftPower >= 0){
@@ -55,6 +64,8 @@ void move(int leftPower, int rightPower)
     } else {
       leftMotor.backward(abs(leftPower));
     }
+  } else {
+    leftMotor.forward(0);
   }
 
   if(abs(rightPower) > 10){
@@ -63,42 +74,54 @@ void move(int leftPower, int rightPower)
     } else {
       rightMotor.backward(abs(rightPower));
     }
+  } else {
+    rightMotor.forward(0);
   }
 }
 
 void readSerial()
 {
   while(Serial.available() > 0){
-    //while(Serial.read() != 'X'){} //Skip chars until 'X'
+    while(Serial.read() != 'X'){} //Skip chars until 'X'
     x = Serial.parseInt();
-    //while(Serial.read() != 'Y'){} //Skip chars until 'Y'
-    y = Serial.parseInt();
+    while(Serial.read() != 'R'){} //Skip chars until 'Y'
+    r = Serial.parseInt();
     while(Serial.read() != '\n'){}
     return;
   }
 }
 
+//store last turn and move powers, for smoothing
 int lastMovePower=0;
 int lastTurnPower=0;
+
 void loop() 
 {
   // find out where the ball is
   readSerial();
   if(x == -1){
-    move(0,0);
+    drive(0,0);
   }
   else{
-    // based on ball Y location, determine overall power
-    int movePower = floor(-1 * Kmoving * (y - targetY));
-    movePower = ceil((lastMovePower + movePower + movePower)/3)
+    // based on ball size, determine overall power
+    int movePower = floor(-1 * KmovingR * (r - targetR));
+    movePower = ceil((lastMovePower + movePower + movePower)/3);
+
+    //debug led
+    if(r < targetR){
+      digitalWrite(ledPin,HIGH);
+    } else{
+      digitalWrite(ledPin,LOW);
+    }
+    
     // based on ball X location, determine turning power
     int turnPower = floor(Kturning * (x - targetX));
-    turnPower = ceil((lastTurnPower + turnPower + turnPower)/3)
-    //Serial.print(movePower);
-    //Serial.print('\t');
-    //Serial.println(turnPower);
+    turnPower = ceil((lastTurnPower + turnPower + turnPower)/3);
+
     // move based on powers.
-    move(movePower + turnPower, movePower - turnPower);
+    drive(movePower + turnPower, movePower - turnPower);
+    lastTurnPower = turnPower;
+    lastMovePower = movePower;
   }
 }
 
