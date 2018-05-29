@@ -33,8 +33,10 @@ void setup() {
 
 void loop() 
 {
-  car.forwardInches(30, 50);
-  delay(5000);
-  car.backwardInches(30,50);
-  delay(5000000);
+  car.forward(50);
+  serial.print(leftEncoder.getRawPosition())
+  serial.print("\t");
+  serial.print(leftEncoder.getPosition())
+  serial.print("\t");
+  serial.println(leftEncoder.getSpeed())
 }
