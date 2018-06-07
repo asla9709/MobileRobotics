@@ -41,7 +41,8 @@ void setup()
 }
 
 //Define target
-const int targetX = 160;
+const int image_width = 640;
+const int targetX = image_width / 2;
 const int targetY = 140;
 const int targetR = 20;
 
