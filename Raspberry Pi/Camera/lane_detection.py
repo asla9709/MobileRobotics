@@ -1,6 +1,5 @@
 # lane_detection.py
 
-import cv2
 import time
 import cv2
 import numpy as np
@@ -35,7 +34,7 @@ while 1:
     #cv2.imshow("display", edged)
     lines = cv2.HoughLinesP(edged,1,np.pi/180,10,minLineLength,maxLineGap)
     
-    horizon = 240;
+    horizon = 240
     #if(lines !=None):
     if(lines is not None and lines.any()):    
        #print (lines)
@@ -44,6 +43,7 @@ while 1:
            for x1,y1,x2,y2 in lines[x]:
                if(y2 < horizon):
                    continue
+
                cv2.line(image,(x1,y1),(x2,y2),(0,255,0),2)
                cenX = int((x1 + x2) / 2)
                cenY = int((y1 + y2) / 2)
