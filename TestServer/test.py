@@ -79,6 +79,7 @@ def handle_exit(socket):
 
 
 if __name__ == '__main__':
+
     while True:
         connection = wait_for_connection()
         try:
