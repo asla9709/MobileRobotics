@@ -1,6 +1,11 @@
+import time
+from threading import Thread
+
 import cv2
 import numpy as np
 
+AUTO_SPEED = 20
+AUTO_X_SCALE = 1
 
 class Camera:
     def __init__(self):
@@ -17,14 +22,52 @@ class Camera:
         self.robot_center = int((50 + 450) / 2)
         self.elipseKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
 
+        self.suggested_move = (0, 0)
+        self.stoplight_detected = False
 
+    def run_(self):
+        while True:
+            #TODO take picture
+            successful, image = self.video.read()
+            self.stoplight_detected = self.detect_stoplight(image)
+            if self.stoplight_detected:
+                self.suggested_move = (0,0)
+            else:
+                self.suggested_move = self.detect_lanes(image)
+            time.sleep(0.1)
 
     def run(self):
-        pass
+        self.run_thread = Thread(target=self.run_)
+        self.run_thread.start()
 
     def detect_stoplight(self, full_image):
-        pass
-    
+        Hmax, Hmin, Smax, Smin, Vmax, Vmin = 12, 0, 255, 164, 255, 70
+
+        hsv = cv2.cvtColor(full_image, cv2.COLOR_BGR2HSV)
+        mask = cv2.inRange(hsv, (Hmin,Smin,Vmin), (Hmax,Smax,Vmax))
+        mask = cv2.erode(mask, None, iterations=2)
+        mask = cv2.dilate(mask, None, iterations=2)
+
+        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[-2]
+
+        if len(cnts) > 0:
+            # find the largest contour in the mask, then use
+            # it to compute the minimum enclosing circle and
+            # centroid
+            c = max(cnts, key=cv2.contourArea)
+            ((x, y), radius) = cv2.minEnclosingCircle(c)
+
+
+            # only proceed if the radius meets a minimum size
+            if radius > 10:
+                # print("STOP")
+                return True #Stoplight detected
+            else:
+                # ser.write("X-1Y-1\n".encode('utf-8'))
+                # ser.write("X-1R-1\n".encode('utf-8'))
+                # print("GO")
+                return False #no stoplight detected
+
     def detect_lanes(self, full_image):
         image = full_image[self.horizon:self.height, 0:self.width]
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -52,11 +95,11 @@ class Camera:
 
         if left_lane is not None or right_lane is not None:
             #cv2.circle(image, (self.robot_center + left_correction + right_correction, self.roi_height), 5, (0, 0, 255))
-            dataLine = "X{0}V{1}\n".format(self.robot_center + left_correction + right_correction, 15)
-            return dataLine
+            #dataLine = "X{0}V{1}\n".format(self.robot_center + left_correction + right_correction, 15)
+            return (AUTO_X_SCALE*(left_correction + right_correction), AUTO_SPEED)
         else:
-            dataLine = "X{0}V{1}\n".format(self.robot_center, 0)
-            return dataLine
+            #dataLine = "X{0}V{1}\n".format(self.robot_center, 0)
+            return (0, 0)
 
 
     def extract_lines(self, contours):

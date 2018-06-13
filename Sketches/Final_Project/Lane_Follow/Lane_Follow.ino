@@ -3,11 +3,15 @@
 #include "I2CEncoder.h"
 #include "Wire.h"
 #include "NewPing.h"
+#include "PhotoSensor.h"
 
 const int startButton = 10;
 const int trigPin = 12;
 const int echoPin = 13;
 const int ledPin = 7;
+const int leftPSensor = 2;
+const int centerPSensor = 1;
+const int rightPSensor = 0;
 
 //initialize car components
 Motor leftMotor(2,3);
@@ -15,6 +19,7 @@ Motor rightMotor(4,5);
 NewPing sonar(trigPin, echoPin);
 I2CEncoder leftEncoder;
 I2CEncoder rightEncoder;
+PhotoSensor lightSensor(leftPSensor, centerPSensor, rightPSensor);
 //initialize car
 Car car(&leftMotor,&rightMotor, &leftEncoder, &rightEncoder, &sonar);
 
@@ -36,47 +41,40 @@ void setup()
   leftEncoder.setReversed(true);
   rightEncoder.zero();
   Serial.begin(9600);
-  
-  car.wait(startButton);
+
+  lightSensor.calibrateSensors(LIGHT,LIGHT,LIGHT);
+  //car.wait(startButton);
 }
 
 //Define target
-const int image_width = 640;
-const int targetX = image_width / 2;
-const int targetY = 140;
-const int targetR = 20;
 
 long x;
-long y;
-long r;
+long v;
 
 //Define Proportional Constants
-const float Kturning = 0.3;
-const float Kmoving = 0.5;
-const float KmovingR = 5;
+const float turn_K = 0.3;
+const float mov_K = 0.5;
 
 //Drive left and right motors
 //if power is too low, don't move
 void drive(int leftPower, int rightPower)
 {
-  if(abs(leftPower) > 10){
-    if(leftPower >= 0){
-      leftMotor.forward(leftPower);
-    } else {
-      leftMotor.backward(abs(leftPower));
-    }
-  } else {
-    leftMotor.forward(0);
+  if(leftPower >= 0)
+  {
+    leftMotor.forward(leftPower);
+  } 
+  else 
+  {
+    leftMotor.backward(abs(leftPower));
   }
-
-  if(abs(rightPower) > 10){
-    if(rightPower >= 0){
-      rightMotor.forward(rightPower);
-    } else {
-      rightMotor.backward(abs(rightPower));
-    }
-  } else {
-    rightMotor.forward(0);
+  
+  if(rightPower >= 0)
+  {
+    rightMotor.forward(rightPower);
+  } 
+  else 
+  {
+    rightMotor.backward(abs(rightPower));
   }
 }
 
@@ -85,11 +83,17 @@ void readSerial()
   while(Serial.available() > 0){
     while(Serial.read() != 'X'){} //Skip chars until 'X'
     x = Serial.parseInt();
-    while(Serial.read() != 'R'){} //Skip chars until 'Y'
-    r = Serial.parseInt();
+    while(Serial.read() != 'V'){} //Skip chars until 'V'
+    v = Serial.parseInt();
     while(Serial.read() != '\n'){}
     return;
   }
+}
+
+void writeSerial()
+{
+  int ultrasonic_threshold = 12;
+  
 }
 
 //store last turn and move powers, for smoothing
@@ -105,18 +109,18 @@ void loop()
   }
   else{
     // based on ball size, determine overall power
-    int movePower = floor(-1 * KmovingR * (r - targetR));
+    int movePower = floor(mov_K * v);
     movePower = ceil((lastMovePower + movePower + movePower)/3);
 
     //debug led
-    if(r < targetR){
+    if(x == 0){
       digitalWrite(ledPin,HIGH);
     } else{
       digitalWrite(ledPin,LOW);
     }
     
     // based on ball X location, determine turning power
-    int turnPower = floor(Kturning * (x - targetX));
+    int turnPower = floor(turn_K * x);
     turnPower = ceil((lastTurnPower + turnPower + turnPower)/3);
 
     // move based on powers.
