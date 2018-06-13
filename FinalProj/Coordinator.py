@@ -12,7 +12,7 @@ class Status(Enum):
 
 
 class Coordinator():
-    def __init__(self, arduino, camera, app):
+    def __init__(self, arduino: Arduino, camera: Camera, app: App):
         self.arduino = arduino
         self.camera = camera
         self.app = app

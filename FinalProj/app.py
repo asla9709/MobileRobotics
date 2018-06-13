@@ -1,9 +1,13 @@
+import math
 from select import select
 import socket
 import time
 import _thread
 import signal
 from threading import Thread
+
+X_SCALE = 0.5
+Y_SCALE = 0.8
 
 
 def get_ip():
@@ -55,10 +59,24 @@ class App():
                     self.connected = True
                     self.connection = client
 
+    def set_status(self, status_int):
+        self.connection.send(
+            "STAT,{} ".format(status_int).encode("utf-8")
+        )
+
+    def send_data(self, *args):
+        pass # TODO SEND DATA
+
     def process_joystick(self,x,y):
-        pass #todo process this crap
-
-
+        if x is None or y is None:
+            return
+        try:
+            x = int(x)
+            y = int(y)
+        except:
+            return
+        self.joystick_move = (math.floor(x*X_SCALE),
+                              math.floor(-y*Y_SCALE))
     def run_(self):
         while True:
             data = self.connection.recv(512)
@@ -93,19 +111,10 @@ class App():
 
 
 if __name__ == '__main__':
-
+    app = App()
     while True:
-        connection = wait_for_connection()
-        try:
-            while True:
-                data = connection.recv(1024)
-                if data:
-                    print(data.decode("utf-8")+"\r")
-                else:
-                    connection.close()
-                    break
-        except KeyboardInterrupt:
-            connection.send("BYE".encode(("UTF-8")))
-            time.sleep(0.2)
-            connection.close()
-    # b_cast_ip()
+        app.wait_for_connection()
+        app.run()
+        while True:
+            print(app.joystick_move)
+            time.sleep(1)
