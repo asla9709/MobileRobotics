@@ -1,10 +1,9 @@
 import time
-from enum import Enum
 from arduino import Arduino
 from app import App
 from camera import Camera
 
-class Status(Enum):
+class Status():
     AUTO = 1
     AUTO_OBSTACLE = 2
     AUTO_RED_LIGHT = 3
@@ -20,7 +19,7 @@ class Coordinator():
 
     def send_command(self):
         if self.app.manual:
-            self.arduino.sendmov(self.app.joystick_move)
+            self.arduino.sendmove(self.app.joystick_move)
             self.app.set_status(Status.MANUAL)
         else:
             if self.arduino.obstacle:
@@ -38,7 +37,7 @@ class Coordinator():
 if __name__ == '__main__':
     camera = Camera()
     app = App()
-    arduino = Arduino()
+    arduino = Arduino(app)
 
     app.wait_for_connection()
 
@@ -47,6 +46,11 @@ if __name__ == '__main__':
     arduino.run()
 
     coordinator = Coordinator(arduino,camera,app)
+    counter = 0
     while True:
         coordinator.send_command()
         time.sleep(0.05)
+        if counter > 100:
+            counter = 0
+            print(app.joystick_move)
+        counter = counter + 1

@@ -48,15 +48,19 @@ void setup()
 
 //Define target
 
-long x;
-long v;
+
 
 //Define Proportional Constants
-const float turn_K = 0.3;
-const float mov_K = 0.5;
+const float turn_K = 0.6;
+const float mov_K = 1;
 
-//Drive left and right motors
-//if power is too low, don't move
+const float targetX = 100;
+const float targetV = 100;
+
+long x = targetX;
+long v = targetV;
+
+
 void drive(int leftPower, int rightPower)
 {
   if(leftPower >= 0)
@@ -92,7 +96,29 @@ void readSerial()
 
 void writeSerial()
 {
-  int ultrasonic_threshold = 12;
+  int ultrasonic_threshold = 20; //cm
+  int distance = sonar.ping_cm();
+  bool obstacle = distance <= ultrasonic_threshold;
+  bool leftStatus = lightSensor.getLeftStatus();
+  bool centerStatus = lightSensor.getCenterStatus();
+  bool rightStatus = lightSensor.getRightStatus();
+  int rps = leftEncoder.getSpeed();
+
+  String outputString = "";
+  outputString += (obstacle) ? "1" : "0";
+  outputString += "::";
+  outputString += distance;
+  outputString += "::";
+  outputString += (leftStatus) ? "1" : "0";
+  outputString += "::";
+  outputString += (centerStatus) ? "1" : "0";
+  outputString += "::";
+  outputString += (rightStatus) ? "1" : "0";
+  outputString += "::";
+  outputString += rps;
+  outputString += "\n";
+
+  Serial.println(outputString); 
   
 }
 
@@ -104,13 +130,14 @@ void loop()
 {
   // find out where the ball is
   readSerial();
+  //writeSerial();
   if(x == -1){
     drive(0,0);
   }
   else{
     // based on ball size, determine overall power
-    int movePower = floor(mov_K * v);
-    movePower = ceil((lastMovePower + movePower + movePower)/3);
+    int movePower = round(mov_K * (v - targetV));
+    movePower = round((lastMovePower + movePower + movePower)/3);
 
     //debug led
     if(x == 0){
@@ -120,8 +147,8 @@ void loop()
     }
     
     // based on ball X location, determine turning power
-    int turnPower = floor(turn_K * x);
-    turnPower = ceil((lastTurnPower + turnPower + turnPower)/3);
+    int turnPower = round(turn_K * (x- targetX));
+    turnPower = round((lastTurnPower + turnPower + turnPower)/3);
 
     // move based on powers.
     drive(movePower + turnPower, movePower - turnPower);

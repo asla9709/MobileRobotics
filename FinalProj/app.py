@@ -5,9 +5,11 @@ import time
 import _thread
 import signal
 from threading import Thread
+from arduino import Arduino
 
-X_SCALE = 0.5
-Y_SCALE = 0.8
+X_SCALE = 1
+Y_SCALE = 1
+
 
 
 def get_ip():
@@ -64,8 +66,16 @@ class App():
             "STAT,{} ".format(status_int).encode("utf-8")
         )
 
-    def send_data(self, *args):
-        pass # TODO SEND DATA
+    def send_data(self, arduino):
+        data_str = "ULTRA,{0}cm SPEED,{1}rpm ".format(arduino.dist, arduino.speed)
+        if arduino.light_sensor[0]:
+            data_str = data_str + "LEFT "
+        if arduino.light_sensor[1]:
+            data_str = data_str + "MID "
+        if arduino.light_sensor[2]:
+            data_str = data_str + "RIGHT "
+        self.connection.send(data_str.encode("utf-8"))
+
 
     def process_joystick(self,x,y):
         if x is None or y is None:

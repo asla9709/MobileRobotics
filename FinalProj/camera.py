@@ -1,11 +1,12 @@
+import math
 import time
 from threading import Thread
 
 import cv2
 import numpy as np
 
-AUTO_SPEED = 20
-AUTO_X_SCALE = 1
+AUTO_SPEED = 50
+AUTO_X_SCALE = 0.8
 
 class Camera:
     def __init__(self):
@@ -16,25 +17,30 @@ class Camera:
         self.video.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
 
         self.horizon = int(self.height / 2)
-        self.robot_left_side = 50 / 2
-        self.robot_right_side = 450 / 2
-        self.roi_height = self.height - self.horizon
+        self.robot_left_side = 25
+        self.robot_right_side = 475
+        self.roi_height = int(self.height - self.horizon)
         self.robot_center = int((50 + 450) / 2)
         self.elipseKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
 
         self.suggested_move = (0, 0)
         self.stoplight_detected = False
+        self.show_video = True
+        self.debug = False
+        self.image = 0
 
     def run_(self):
         while True:
-            #TODO take picture
             successful, image = self.video.read()
-            self.stoplight_detected = self.detect_stoplight(image)
-            if self.stoplight_detected:
-                self.suggested_move = (0,0)
+            if successful:
+                self.stoplight_detected = self.detect_stoplight(image)
+                if self.stoplight_detected:
+                    self.suggested_move = (0,0)
+                else:
+                    self.suggested_move = self.detect_lanes(image)
+                time.sleep(0.1)
             else:
-                self.suggested_move = self.detect_lanes(image)
-            time.sleep(0.1)
+                self.suggested_move = (0,0)
 
     def run(self):
         self.run_thread = Thread(target=self.run_)
@@ -73,33 +79,51 @@ class Camera:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5,5), 0)
         #parameters I found to giv the best filter
-        edged = cv2.Canny(blurred, threshold1=0, threshold2=400)
+        edged = cv2.Canny(blurred, threshold1=0, threshold2=348)
         out = cv2.morphologyEx(edged, cv2.MORPH_CLOSE, self.elipseKernel, iterations = 7)
         out, contour,hier = cv2.findContours(out,cv2.RETR_CCOMP,cv2.CHAIN_APPROX_SIMPLE)
         left_lane, right_lane = self.extract_lines(contour)
 
-        right_correction = left_correction = 0
-        if left_lane is not None:
-            left_point = tuple(left_lane[left_lane[:, :, 1].argmax()][0])
-            #cv2.drawContours(image,[left_lane],0, (255, 0, 0),-1)
-            #v2.circle(image, (left_point[0],left_point[1]), 5, (0, 0, 255))
-            left_correction = int(left_point[0] - (self.robot_left_side- 25))
-            #cv2.circle(image, (self.robot_center + left_correction, int(left_point[1])), 10, (0, 255, 255))
+        if not left_lane is None and  not right_lane is None:
+            x,y,w,h = cv2.boundingRect(left_lane)
+            mid_left = math.floor(x + w/2)
+            x, y, w, h = cv2.boundingRect(right_lane)
+            mid_right = math.floor(x + w / 2)
 
-        if right_lane is not None:
-            right_point = tuple(right_lane[right_lane[:, :, 1].argmax()][0])
-            #cv2.drawContours(image,[right_lane],0, (0, 255, 0),-1)
-            #cv2.circle(image, (right_point[0],right_point[1]), 5, (0, 0, 255))
-            right_correction = int(right_point[0] - (self.robot_right_side + 25))
-            #cv2.circle(image, (self.robot_center + right_correction, int(right_point[1])), 10, (0, 255, 255))
+            mid = math.floor((mid_left+mid_right)/2)
+            xoffset = (mid - self.robot_center)
 
-        if left_lane is not None or right_lane is not None:
-            #cv2.circle(image, (self.robot_center + left_correction + right_correction, self.roi_height), 5, (0, 0, 255))
-            #dataLine = "X{0}V{1}\n".format(self.robot_center + left_correction + right_correction, 15)
-            return (AUTO_X_SCALE*(left_correction + right_correction), AUTO_SPEED)
+            cv2.circle(image, (math.floor(mid), 30), 5, (255,255,255))
+            cv2.line(image,(mid_left,0),(mid_left,200),(255,255,255))
+            cv2.line(image,(mid_right,0),(mid_right,200),(255,255,255))
+
+        elif not left_lane is None:
+            x,y,w,h = cv2.boundingRect(left_lane)
+            mid_left = math.floor(x + w/2)
+
+            xoffset = mid_left - self.robot_left_side
+
+        elif not right_lane is None:
+            x,y,w,h = cv2.boundingRect(right_lane)
+            mid_right = math.floor(x + w/2)
+
+            xoffset = mid_right - self.robot_right_side
+
         else:
-            #dataLine = "X{0}V{1}\n".format(self.robot_center, 0)
-            return (0, 0)
+            xoffset = 0
+
+        xoffset = math.floor(xoffset)
+        if self.debug:
+            cv2.line(image, (self.robot_center,150), (self.robot_center + xoffset,150), (255,255,0))
+            cv2.line(image,(self.robot_center, 0),(self.robot_center, self.roi_height),(0,0,255),2)
+            cv2.line(image,(self.robot_left_side, 0),(self.robot_left_side, self.roi_height),(0,0,255),2)
+            cv2.line(image,(self.robot_right_side, 0),(self.robot_right_side, self.roi_height),(0,0,255),2)
+
+            cv2.imshow("Frame_3", image)
+            key = cv2.waitKey(1) & 0xFF
+
+        return(xoffset*AUTO_X_SCALE, AUTO_SPEED)
+
 
 
     def extract_lines(self, contours):
@@ -107,27 +131,33 @@ class Camera:
         #print(np.minimum([contours[0]]))
         if count == 0:
             return None, None
-        if count == 1:
-            lowest_x =  tuple(contours[0][contours[0][:, :, 1].argmax()][0])
 
-            if lowest_x > self.robot_center:
+        if count == 1:
+            rect = cv2.minAreaRect(contours[0])
+            angle = rect[2]
+            if (rect[1][0] > rect[1][1]):
+                angle = angle + 90
+
+            if angle < 0:
                 return None, contours[0]
             else:
                 return contours[0], None
+
         if count == 2:
-            first_lowest_x = tuple(contours[0][contours[0][:, :, 1].argmax()][0])
-            second_lowest_x =  tuple(contours[1][contours[1][:, :, 1].argmax()][0])
+            first_average_x = np.mean([contours[0]], 1)[0][0][0]
+            second_average_x = np.mean([contours[1]], 1)[0][0][0]
             #print(average_point)
-            if first_lowest_x > second_lowest_x:
+            if first_average_x > second_average_x:
                 return contours[1], contours[0]
             else:
                 return contours[0], contours[1]
+
         if count > 2:
-            left, right = contours[0]
+            left, right = contours[0], contours[0]
             for contour in contours:
                 lowest_x = tuple(contour[contour[:, :, 1].argmax()][0])
-                left_lowest_x =  tuple(left[left[:, :, 1].argmax()][0])
-                right_lowest_x =  tuple(right[right[:, :, 1].argmax()][0])
+                left_lowest_x = tuple(left[left[:, :, 1].argmax()][0])
+                right_lowest_x = tuple(right[right[:, :, 1].argmax()][0])
                 if abs(lowest_x[0] - self.robot_left_side) < abs(left_lowest_x[0] - self.robot_left_side):
                     left = contour
                 elif abs(lowest_x[0] - self.robot_right_side) < abs(right_lowest_x[0] - self.robot_right_side):
